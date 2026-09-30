@@ -7,12 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "nowfix",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash_screen.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1D5EBA"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -32,7 +26,15 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash_screen.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#1D5EBA"
+        }
+      ],
       "expo-status-bar"
     ],
     "experiments": {

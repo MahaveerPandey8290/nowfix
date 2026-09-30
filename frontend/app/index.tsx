@@ -1152,17 +1152,13 @@ export default function Index() {
   const [phone, setPhone] = useState('');
 
   useEffect(() => {
-    AsyncStorage.multiGet(['nowfix_onboarding', 'nowfix_logged_in']).then(([[, seen], [, loggedIn]]) => {
-      if (loggedIn === 'true') setScreen('home');
-      else if (seen === 'true') setScreen('login');
-      // else stay on splash
-    });
+    // Always clear session so the full flow runs every time:
+    // Splash → Onboarding → Login → Home
+    AsyncStorage.multiRemove(['nowfix_onboarding', 'nowfix_logged_in']);
   }, []);
 
   const go = (next: Screen) => {
     setScreen(next);
-    if (next === 'login') AsyncStorage.setItem('nowfix_onboarding', 'true');
-    if (next === 'home') AsyncStorage.setItem('nowfix_logged_in', 'true');
   };
 
   const goLocation = (returnScreen: Screen) => {

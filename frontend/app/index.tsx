@@ -1,43 +1,2140 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ArrowRight, Bell, Check, ChevronDown, ChevronRight, Clock3, Droplets, Home as HomeIcon, MapPin, Search, ShieldCheck, Sparkles, UserRound, Wrench, Zap, Snowflake, Hammer, Paintbrush, Bug, CircleEllipsis, Refrigerator, Armchair, Cpu, LockKeyhole, Eye, EyeOff, Navigation, Phone, MessageCircle, CalendarDays } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Clock3,
+  Home as HomeIcon,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+  Wrench,
+  Camera,
+  MessageCircle,
+  CalendarDays,
+  LockKeyhole,
+} from 'lucide-react-native';
 import { categories, popularCities, recentServices } from '@/src/data/mock';
 import { colors, radius, spacing, typography } from '@/src/theme';
 
-type Screen = 'splash' | 'onboarding' | 'login' | 'otp' | 'create' | 'profile' | 'forgot' | 'reset' | 'location' | 'home' | 'categories' | 'bookings' | 'messages' | 'profileTab';
-type IconName = 'Zap' | 'Droplets' | 'Refrigerator' | 'Sparkles' | 'Hammer' | 'Paintbrush' | 'Bug' | 'Snowflake' | 'Armchair' | 'Cpu' | 'ShieldCheck' | 'Ellipsis';
-const iconMap = { Zap, Droplets, Refrigerator, Sparkles, Hammer, Paintbrush, Bug, Snowflake, Armchair, Cpu, ShieldCheck, Ellipsis: CircleEllipsis };
+type Screen =
+  | 'splash'
+  | 'onboarding'
+  | 'login'
+  | 'otp'
+  | 'create'
+  | 'profile'
+  | 'forgot'
+  | 'reset'
+  | 'location'
+  | 'home'
+  | 'categories'
+  | 'bookings'
+  | 'messages'
+  | 'profileTab';
 
-function Brand({ compact = false }: { compact?: boolean }) { return <View style={styles.brand}><View style={styles.brandBox}><Text style={styles.brandTop}>NOW</Text><Text style={styles.brandBottom}>FI <Wrench size={compact ? 16 : 22} color={colors.accent} strokeWidth={3} /></Text></View>{!compact && <Text style={styles.brandTag}>FIX ANY PROBLEM <Text style={styles.brandOrange}>INSTANTLY</Text></Text>}</View>; }
-function Toast({ text }: { text: string }) { return <View style={styles.toast}><Check size={16} color={colors.surface} /><Text style={styles.toastText}>{text}</Text></View>; }
-function PrimaryButton({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) { return <Pressable disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.primary, disabled && styles.disabled, pressed && styles.pressed]}><Text style={styles.primaryText}>{title}</Text><ArrowRight size={22} color={colors.surface} /></Pressable>; }
-function Field({ label, value, onChangeText, keyboardType = 'default', icon }: { label: string; value: string; onChangeText: (v: string) => void; keyboardType?: 'default' | 'phone-pad' | 'email-address'; icon?: React.ReactNode }) { return <View style={styles.field}>{icon}{<TextInput placeholder={label} placeholderTextColor={colors.muted} value={value} onChangeText={onChangeText} keyboardType={keyboardType} style={styles.input} />}</View>; }
-function LocationPill({ location, onPress }: { location: string; onPress: () => void }) { return <Pressable onPress={onPress} style={styles.locationPill}><MapPin size={17} color={colors.primary} /><Text style={styles.locationText}>{location}</Text><ChevronDown size={16} color={colors.primary} /></Pressable>; }
-function CategoryIcon({ name, size = 25 }: { name: IconName; size?: number }) { const Icon = iconMap[name]; return <Icon size={size} color={colors.primary} strokeWidth={2.2} />; }
-function CategoryRow() { return <View style={styles.categoryRow}>{[['Electrician','Zap'],['Plumber','Droplets'],['Appliance\nRepair','Refrigerator'],['Cleaning','Sparkles']].map(([label, icon]) => <View key={label} style={styles.categoryMini}><View style={styles.categoryIcon}><CategoryIcon name={icon as IconName} /></View><Text style={styles.categoryLabel}>{label}</Text></View>)}</View>; }
-function Header({ onLocation, onBack, title }: { onLocation?: () => void; onBack?: () => void; title?: string }) { return <View style={styles.header}>{onBack ? <Pressable onPress={onBack} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable> : <Brand compact />}{title && <Text style={styles.headerTitle}>{title}</Text>}{onLocation ? <LocationPill location="Bikaner, Rajasthan" onPress={onLocation} /> : <Bell size={23} color={colors.navy} />}</View>; }
-function FortFooter() { return <View style={styles.fort}><Text style={styles.fortText}>Local Help{`\n`}Local People</Text><View style={styles.fortShape} /></View>; }
-function AuthShell({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) { const body = scroll ? <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>{children}</ScrollView> : children; return <SafeAreaView style={styles.safe}><StatusBar style="dark" />{body}</SafeAreaView>; }
+function Toast({ text }: { text: string }) {
+  return (
+    <View style={styles.toast}>
+      <Check size={16} color={colors.surface} />
+      <Text style={styles.toastText}>{text}</Text>
+    </View>
+  );
+}
 
-function Splash({ next }: { next: () => void }) { useEffect(() => { const timer = setTimeout(next, 1800); return () => clearTimeout(timer); }, [next]); return <LinearGradient colors={['#246BCB','#125AB9']} style={styles.splash}><Wrench size={120} color="#ffffff1c" style={styles.bgTool} /><View style={styles.splashCenter}><Brand /><Text style={styles.splashCopy}>FIX ANY PROBLEM</Text><Text style={styles.splashOrange}>INSTANTLY</Text></View><View style={styles.splashLine} /></LinearGradient>; }
-function Onboarding({ next }: { next: (s: Screen) => void }) { const [slide, setSlide] = useState(0); const copy = [{ title: 'Reliable Home Services\nNow Just a Tap Away', body: 'Book verified professionals for electrical, plumbing, appliance repair, cleaning and more in your city.', chips: ['Fast Booking','Verified Professionals','Live Tracking'] }, { title: 'Skilled Professionals,\nAt Your Doorstep', body: 'Every professional is verified so you can book with confidence and peace of mind.', chips: ['Verified Experts','Fair Pricing','Quality Work'] }, { title: 'Your Home,\nOur Responsibility', body: 'From quick fixes to urgent repairs, NowFix keeps your home running smoothly.', chips: ['Quick Response','Trusted Service','Easy Payments'] }][slide]; return <AuthShell><View style={styles.onboardTop}><Brand /><Pressable onPress={() => next('login')}><Text style={styles.linkText}>Skip</Text></Pressable></View><View style={styles.onboardCopy}><Text style={styles.heroTitle}>{copy.title}</Text><Text style={styles.bodyText}>{copy.body}</Text></View><View style={styles.mascot}><View style={styles.mascotCircle}><Wrench size={90} color={colors.primary} /></View>{copy.chips.map((chip, i) => <View key={chip} style={[styles.chip, i === 1 && styles.chipMiddle, i === 2 && styles.chipRight]}><Check size={16} color={colors.primary} /><Text style={styles.chipText}>{chip}</Text></View>)}<Text style={styles.handNote}>Local Help{`\n`}Local People</Text></View><View style={styles.dots}>{[0,1,2].map(i => <View key={i} style={[styles.dot, i === slide && styles.dotActive]} />)}</View><PrimaryButton title={slide === 2 ? 'Get Started' : 'Next'} onPress={() => slide === 2 ? next('login') : setSlide(slide + 1)} /><Text style={styles.underButton}>A smarter way to keep your home running.</Text><FortFooter /></AuthShell>; }
-function Login({ next, location, onLocation, onSubmit }: { next: (s: Screen) => void; location: string; onLocation: () => void; onSubmit: (mobile: string) => void }) { const [mobile, setMobile] = useState(''); const [toast, setToast] = useState(''); const valid = /^[6-9]\d{9}$/.test(mobile); const showToast = (t: string) => { setToast(t); setTimeout(() => setToast(''), 1800); }; return <AuthShell><View style={styles.loginTop}><Brand /><LocationPill location={location} onPress={onLocation} /></View><Text style={styles.tagline}>Trusted home services, right at your doorstep.</Text><CategoryRow /><View style={styles.card}><Text style={styles.sectionTitle}>Login or Sign Up</Text><Text style={styles.bodyTextLeft}>Enter your mobile number to continue</Text><View style={[styles.field, !valid && mobile.length > 0 && styles.errorField]}><Text style={styles.country}>🇮🇳 +91</Text><TextInput placeholder="Enter mobile number" placeholderTextColor={colors.muted} value={mobile} onChangeText={v => setMobile(v.replace(/\D/g, '').slice(0, 10))} keyboardType="phone-pad" style={styles.input} /></View>{!valid && mobile.length > 0 && <Text style={styles.errorText}>Enter a valid 10-digit mobile number</Text>}<PrimaryButton title="Continue" disabled={!valid} onPress={() => { onSubmit(mobile); next('otp'); }} /><View style={styles.divider}><View style={styles.dividerLine} /><Text style={styles.dividerText}>or continue with</Text><View style={styles.dividerLine} /></View><View style={styles.socialRow}><Pressable onPress={() => showToast('Demo only')} style={styles.social}><Text style={styles.google}>G</Text><Text style={styles.socialText}>Continue with Google</Text></Pressable><Pressable onPress={() => showToast('Demo only')} style={styles.social}><Text style={styles.apple}>●</Text><Text style={styles.socialText}>Continue with Apple</Text></Pressable></View><Text style={styles.terms}>By continuing, you agree to our <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text></Text><Pressable onPress={() => next('forgot')}><Text style={styles.forgotLink}>Forgot password?</Text></Pressable></View>{toast && <Toast text={toast} />}<FortFooter /></AuthShell>; }
-function Otp({ next, phone, back }: { next: (s: Screen) => void; phone: string; back: () => void }) { const [otp, setOtp] = useState(''); const [seconds, setSeconds] = useState(30); const [error, setError] = useState(''); useEffect(() => { const timer = setInterval(() => setSeconds(s => s > 0 ? s - 1 : 0), 1000); return () => clearInterval(timer); }, []); const verify = () => { if (otp !== '123456') { setError('Incorrect OTP. Please try again.'); return; } next(Number(phone.slice(-1)) % 2 === 0 ? 'home' : 'create'); }; return <AuthShell><View style={styles.authHeader}><Pressable onPress={back} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable><Text style={styles.stepText}>Secure Verification</Text></View><View style={styles.otpArt}><View style={styles.otpBubble}><LockKeyhole size={48} color={colors.primary} /></View></View><Text style={styles.heroTitle}>Verify your mobile number</Text><Text style={styles.bodyText}>We have sent a 6-digit OTP to{`\n`}+91 {phone || 'XXXXX XXXXX'} <Text style={styles.linkText}>Edit</Text></Text><View style={styles.otpRow}>{Array.from({ length: 6 }).map((_, i) => <TextInput key={i} maxLength={1} keyboardType="number-pad" value={otp[i] || ''} onChangeText={v => setOtp((otp.slice(0, i) + v + otp.slice(i + 1)).slice(0, 6))} style={[styles.otpBox, error && styles.errorField]} />)}</View>{error && <Text style={styles.errorText}>{error}</Text>}<Text style={styles.resend}>Didn't receive it? <Text style={styles.linkText}>{seconds ? `Resend in ${seconds}s` : 'Resend now'}</Text></Text><PrimaryButton title="Verify OTP" disabled={otp.length !== 6} onPress={verify} /><View style={styles.badges}>{['Secure Verification','Quick Access','Join Thousands'].map(label => <View key={label} style={styles.badge}><ShieldCheck size={18} color={colors.success} /><Text style={styles.badgeText}>{label}</Text></View>)}</View></AuthShell>; }
-function Create({ next, location, onLocation, back }: { next: (s: Screen) => void; location: string; onLocation: () => void; back: () => void }) { const [name, setName] = useState(''); const [mobile, setMobile] = useState(''); const [terms, setTerms] = useState(false); const valid = name.trim().length > 1 && /^[6-9]\d{9}$/.test(mobile) && terms; return <AuthShell><View style={styles.authHeader}><Pressable onPress={back} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable><Text style={styles.stepText}>Step 1 of 3</Text></View><Brand /><Text style={styles.bodyText}>Create your account and get started with{`\n`}trusted home services.</Text><CategoryRow /><View style={styles.card}><Text style={styles.sectionTitle}>Create Your Account</Text><Text style={styles.bodyTextLeft}>Quick registration, almost there!</Text><Field label="Full Name" value={name} onChangeText={setName} icon={<UserRound size={21} color={colors.muted} />} /><View style={styles.field}><Text style={styles.country}>🇮🇳 +91</Text><TextInput placeholder="Enter mobile number" placeholderTextColor={colors.muted} value={mobile} onChangeText={v => setMobile(v.replace(/\D/g, '').slice(0, 10))} keyboardType="phone-pad" style={styles.input} /><Pressable style={styles.inlineButton}><Text style={styles.inlineButtonText}>Send OTP</Text></Pressable></View><Field label="Enter OTP" value="" onChangeText={() => undefined} icon={<LockKeyhole size={21} color={colors.muted} />} /><Text style={styles.resend}>Didn't receive? <Text style={styles.linkText}>Resend in 30s</Text></Text><Field label="Email Address (Optional)" value="" onChangeText={() => undefined} icon={<MessageCircle size={21} color={colors.muted} />} /><Pressable onPress={() => setTimeout(() => undefined, 0)} style={styles.field}><MapPin size={21} color={colors.muted} /><Text style={styles.selectText}>{location}</Text><ChevronDown size={20} color={colors.navy} /></Pressable><Pressable onPress={() => setTerms(!terms)} style={styles.checkRow}><View style={[styles.checkbox, terms && styles.checkboxOn]}>{terms && <Check size={15} color={colors.surface} />}</View><Text style={styles.termsSmall}>I agree to the <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text></Text></Pressable><PrimaryButton title="Create Account" disabled={!valid} onPress={() => next('profile')} /><Text style={styles.terms}>Already have an account? <Text style={styles.linkText} onPress={() => next('login')}>Login</Text></Text></View><FortFooter /></AuthShell>; }
-function ProfileSetup({ next, location, onLocation, back }: { next: (s: Screen) => void; location: string; onLocation: () => void; back: () => void }) { return <AuthShell><View style={styles.authHeader}><Pressable onPress={back} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable><Pressable onPress={() => next('home')}><Text style={styles.stepText}>Skip for now</Text></Pressable></View><Brand /><Text style={styles.bodyText}>Just a few details to complete your profile.</Text><View style={styles.stepper}>{['Mobile Verified','Create Account','Profile Setup'].map((step, i) => <View key={step} style={styles.stepperItem}><View style={[styles.stepCircle, i < 2 ? styles.stepDone : styles.stepCurrent]}>{i < 2 ? <Check size={17} color={colors.surface} /> : <Text style={styles.stepNumber}>3</Text>}</View><Text style={styles.stepLabel}>{step}</Text></View>)}</View><Text style={styles.profileTitle}>Complete Your Profile</Text><Text style={styles.bodyTextLeft}>Help us serve you better with the right services.</Text><Pressable style={styles.avatar}><UserRound size={43} color={colors.primary} /><Text style={styles.avatarText}>Add Profile Photo{`\n`}<Text style={styles.avatarMuted}>(Optional)</Text></Text></Pressable><Field label="Full Name\ne.g. Rahul Sharma" value="" onChangeText={() => undefined} icon={<UserRound size={22} color={colors.muted} />} /><Field label="Email Address (Optional)\ne.g. rahul@example.com" value="" onChangeText={() => undefined} icon={<MessageCircle size={22} color={colors.muted} />} /><Pressable onPress={onLocation} style={styles.field}><MapPin size={22} color={colors.muted} /><Text style={styles.selectText}>{location}</Text><ChevronDown size={20} color={colors.navy} /></Pressable><View style={styles.info}><HomeIcon size={24} color={colors.primary} /><Text style={styles.infoText}>Your location helps us show available{`\n`}services in your area.</Text></View><PrimaryButton title="Continue" onPress={() => next('home')} /><FortFooter /></AuthShell>; }
-function Forgot({ next, back }: { next: (s: Screen) => void; back: () => void }) { return <AuthShell><View style={styles.authHeader}><Pressable onPress={back} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable><Text style={styles.stepText}>Forgot Password</Text></View><View style={styles.otpArt}><LockKeyhole size={58} color={colors.primary} /></View><Text style={styles.heroTitle}>Forgot your password?</Text><Text style={styles.bodyText}>Enter your mobile number and we'll send you an OTP to reset it.</Text><Field label="Enter mobile number" value="" onChangeText={() => undefined} keyboardType="phone-pad" icon={<Phone size={20} color={colors.muted} />} /><PrimaryButton title="Send OTP" onPress={() => next('otp')} /><View style={styles.info}><ShieldCheck size={23} color={colors.primary} /><Text style={styles.infoText}>Your account is safe with us.</Text></View><Pressable onPress={back}><Text style={styles.centerLink}>Back to Login</Text></Pressable></AuthShell>; }
-function Reset({ next }: { next: (s: Screen) => void }) { const [show, setShow] = useState(false); const [password, setPassword] = useState(''); const [confirm, setConfirm] = useState(''); const rules = [password.length >= 8, /[A-Z]/.test(password), /[a-z]/.test(password), /\d/.test(password)]; return <AuthShell><View style={styles.authHeader}><Text style={styles.stepText}>Reset Password</Text></View><Text style={styles.heroTitle}>Create a new password</Text><Text style={styles.bodyTextLeft}>Make it strong and easy to remember.</Text>{[['New Password', password, setPassword], ['Confirm Password', confirm, setConfirm]].map(([label, value, setter]) => <View key={label as string} style={styles.field}><LockKeyhole size={20} color={colors.muted} /><TextInput placeholder={label as string} placeholderTextColor={colors.muted} secureTextEntry={!show} value={value as string} onChangeText={setter as (v: string) => void} style={styles.input} /><Pressable onPress={() => setShow(!show)}>{show ? <EyeOff size={20} color={colors.muted} /> : <Eye size={20} color={colors.muted} />}</Pressable></View>)}<View style={styles.rules}>{['At least 8 characters','One uppercase letter','One lowercase letter','One number'].map((rule, i) => <View key={rule} style={styles.rule}><Check size={16} color={rules[i] ? colors.success : colors.muted} /><Text style={[styles.ruleText, rules[i] && styles.ruleDone]}>{rule}</Text></View>)}</View><PrimaryButton title="Reset Password" disabled={!rules.every(Boolean) || password !== confirm} onPress={() => next('login')} /></AuthShell>; }
-function Location({ location, setLocation, back }: { location: string; setLocation: (v: string) => void; back: () => void }) { const [query, setQuery] = useState(''); const filtered = popularCities.filter(city => city.toLowerCase().includes(query.toLowerCase())); return <AuthShell><View style={styles.authHeader}><Pressable onPress={back} style={styles.iconButton}><ArrowLeft size={25} color={colors.navy} /></Pressable><Text style={styles.screenTitle}>Select Location</Text></View><View style={styles.map}><View style={styles.mapRoad} /><View style={[styles.mapPin, { top: 55, left: 70 }]}><MapPin size={30} color={colors.primary} fill={colors.primary} /></View><View style={[styles.mapPin, { top: 110, right: 90 }]}><MapPin size={26} color={colors.orange} fill={colors.orange} /></View><View style={[styles.mapPin, { bottom: 30, left: 160 }]}><MapPin size={28} color={colors.primary} fill={colors.primary} /></View></View><View style={styles.locationSearch}><Search size={20} color={colors.muted} /><TextInput placeholder="Search for your location" placeholderTextColor={colors.muted} value={query} onChangeText={setQuery} style={styles.input} /></View><Pressable style={styles.currentLocation}><Navigation size={19} color={colors.primary} /><Text style={styles.linkText}>Use Current Location</Text></Pressable><View style={styles.locationSection}><View style={styles.locationSectionTitle}><Text style={styles.smallTitle}>Recent Locations</Text><Text style={styles.linkText}>Clear All</Text></View><Pressable onPress={() => setLocation('Bikaner, Rajasthan')} style={styles.recentLocation}><Clock3 size={19} color={colors.muted} /><Text style={styles.selectText}>{location}</Text>{location === 'Bikaner, Rajasthan' && <Check size={19} color={colors.primary} />}</Pressable></View><Text style={styles.smallTitle}>Popular Cities</Text><View style={styles.cityGrid}>{filtered.map(city => <Pressable key={city} onPress={() => setLocation(city)} style={[styles.city, location === city && styles.citySelected]}><MapPin size={15} color={location === city ? colors.primary : colors.muted} /><Text style={styles.cityText}>{city}</Text></Pressable>)}</View><PrimaryButton title="Confirm Location" onPress={back} /></AuthShell>; }
-function Home({ location, onLocation, openCategories, tab }: { location: string; onLocation: () => void; openCategories: () => void; tab: (s: Screen) => void }) { return <AuthShell><ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}><View style={styles.homeHeader}><Brand compact /><View style={styles.homeActions}><LocationPill location={location} onPress={onLocation} /><Bell size={23} color={colors.navy} /></View></View><Text style={styles.homeGreeting}>Hello, Rahul</Text><Text style={styles.homeTitle}>How can we help today?</Text><View style={styles.locationSearch}><Search size={20} color={colors.muted} /><TextInput placeholder="Search for a service" placeholderTextColor={colors.muted} style={styles.input} /></View><LinearGradient colors={['#1E63C6','#0F4EA7']} style={styles.banner}><View><Text style={styles.bannerEyebrow}>FAST, RELIABLE & LOCAL</Text><Text style={styles.bannerTitle}>Fix it today.{`\n`}We'll handle the rest.</Text><PrimaryButton title="Book a Service" onPress={() => undefined} /></View><Wrench size={80} color="#ffffffaa" /></LinearGradient><View style={styles.bannerDots}><View style={[styles.dot, styles.dotActive]} /><View style={styles.dot} /><View style={styles.dot} /></View><View style={styles.sectionHeader}><Text style={styles.smallTitle}>Service Categories</Text><Pressable onPress={openCategories}><Text style={styles.linkText}>See All</Text></Pressable></View><View style={styles.grid}>{categories.slice(0,8).map(([name,, icon]) => <Pressable key={name} onPress={openCategories} style={styles.gridItem}><View style={styles.gridIcon}><CategoryIcon name={icon} /></View><Text style={styles.gridLabel}>{name}</Text></Pressable>)}</View><View style={styles.sectionHeader}><Text style={styles.smallTitle}>Recent Services</Text><Text style={styles.linkText}>View All</Text></View>{recentServices.map(([title, date, icon]) => <View key={title} style={styles.serviceRow}><View style={styles.serviceThumb}><CategoryIcon name={icon} size={22} /></View><View style={styles.serviceInfo}><Text style={styles.serviceTitle}>{title}</Text><Text style={styles.serviceDate}>{date}</Text></View><Text style={styles.completed}>Completed</Text><ChevronRight size={18} color={colors.muted} /></View>)}<View style={styles.urgent}><View><Text style={styles.urgentTitle}>Need help urgently?</Text><Text style={styles.urgentText}>Get a professional in minutes.</Text></View><Pressable style={styles.callButton}><Phone size={17} color={colors.surface} /><Text style={styles.callText}>Call Now</Text></Pressable></View></ScrollView><BottomTabs active="home" tab={tab} /></AuthShell>; }
-function Categories({ location, onLocation, back, tab }: { location: string; onLocation: () => void; back: () => void; tab: (s: Screen) => void }) { return <AuthShell><ScrollView contentContainerStyle={styles.scroll}><Header onBack={back} title="Service Categories" onLocation={onLocation} /><Text style={styles.profileTitle}>Service Categories</Text><Text style={styles.bodyTextLeft}>What can we help you with?</Text><View style={styles.locationSearch}><Search size={20} color={colors.muted} /><TextInput placeholder="Search services" placeholderTextColor={colors.muted} style={styles.input} /></View><View style={styles.grid}>{categories.map(([name, sub, icon]) => <View key={name} style={styles.gridItem}><View style={styles.gridIcon}><CategoryIcon name={icon} /></View><Text style={styles.gridLabel}>{name}</Text><Text style={styles.gridSub}>{sub}</Text></View>)}</View><Text style={styles.smallTitle}>Popular Services</Text><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.popularRow}>{['AC Repair & Service','Home Cleaning','Electrical Repair'].map((item, i) => <View key={item} style={styles.popularCard}><View style={styles.popularIcon}><Sparkles size={24} color={colors.primary} /></View><Text style={styles.serviceTitle}>{item}</Text><Text style={styles.serviceDate}>4.{8-i}  ({320-i*55}+)  From ₹{299-i*50}</Text></View>)}</ScrollView></ScrollView><BottomTabs active="categories" tab={tab} /></AuthShell>; }
-function Placeholder({ title, icon, tab }: { title: string; icon: React.ReactNode; tab: (s: Screen) => void }) { return <AuthShell><View style={styles.placeholder}><View style={styles.placeholderIcon}>{icon}</View><Text style={styles.profileTitle}>{title}</Text><Text style={styles.bodyText}>Coming soon</Text></View><BottomTabs active={title.toLowerCase()} tab={tab} /></AuthShell>; }
-function BottomTabs({ active, tab }: { active: string; tab: (s: Screen) => void }) { return <View style={styles.tabs}>{[['home','Home',HomeIcon],['categories','Categories',Sparkles],['bookings','Bookings',CalendarDays],['messages','Messages',MessageCircle],['profile','Profile',UserRound]].map(([key, label, Icon]) => { const IconComponent = Icon as typeof HomeIcon; return <Pressable key={key as string} onPress={() => tab(key === 'home' ? 'home' : key === 'categories' ? 'categories' : key === 'bookings' ? 'bookings' : key === 'messages' ? 'messages' : 'profileTab')} style={styles.tab}><IconComponent size={21} color={active === key ? colors.primary : colors.muted} /><Text style={[styles.tabLabel, active === key && styles.tabActive]}>{label as string}</Text></Pressable>; })}</View>; }
+function PrimaryButton({
+  title,
+  onPress,
+  disabled = false,
+}: {
+  title: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.primaryButton,
+        disabled && styles.primaryButtonDisabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={styles.primaryButtonText}>{title}</Text>
+      <ArrowRight size={20} color={colors.surface} />
+    </Pressable>
+  );
+}
 
-export default function Index() { const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold }); const [screen, setScreen] = useState<Screen>('splash'); const [location, setLocation] = useState('Bikaner, Rajasthan'); const [locationReturn, setLocationReturn] = useState<Screen>('login'); const [forgotFlow, setForgotFlow] = useState(false); const [phone, setPhone] = useState(''); useEffect(() => { Promise.all([AsyncStorage.getItem('nowfix_onboarding'), AsyncStorage.getItem('nowfix_logged_in')]).then(([seen, loggedIn]) => { if (loggedIn === 'true') setScreen('home'); else if (seen === 'true') setScreen('login'); }); }, []); const go = (next: Screen) => { setScreen(next); if (next === 'login') AsyncStorage.setItem('nowfix_onboarding', 'true'); if (next === 'home') AsyncStorage.setItem('nowfix_logged_in', 'true'); }; const screenView = useMemo(() => { if (!fontsLoaded) return null; if (screen === 'splash') return <Splash next={() => go('onboarding')} />; if (screen === 'onboarding') return <Onboarding next={go} />; if (screen === 'login') return <Login next={go} onSubmit={setPhone} location={location} onLocation={() => { setLocationReturn('login'); go('location'); }} />; if (screen === 'otp') return <Otp next={s => { if (forgotFlow && s === 'home') { setForgotFlow(false); go('reset'); } else go(s); }} phone={phone} back={() => go('login')} />; if (screen === 'create') return <Create next={go} location={location} onLocation={() => { setLocationReturn('create'); go('location'); }} back={() => go('login')} />; if (screen === 'profile') return <ProfileSetup next={go} location={location} onLocation={() => { setLocationReturn('profile'); go('location'); }} back={() => go('create')} />; if (screen === 'forgot') return <Forgot next={s => { if (s === 'otp') setForgotFlow(true); go(s); }} back={() => go('login')} />; if (screen === 'reset') return <Reset next={go} />; if (screen === 'location') return <Location location={location} setLocation={setLocation} back={() => go(locationReturn)} />; if (screen === 'home') return <Home location={location} onLocation={() => { setLocationReturn('home'); go('location'); }} openCategories={() => go('categories')} tab={go} />; if (screen === 'categories') return <Categories location={location} onLocation={() => { setLocationReturn('categories'); go('location'); }} back={() => go('home')} tab={go} />; if (screen === 'bookings') return <Placeholder title="Bookings" icon={<CalendarDays size={32} color={colors.primary} />} tab={go} />; if (screen === 'messages') return <Placeholder title="Messages" icon={<MessageCircle size={32} color={colors.primary} />} tab={go} />; return <Placeholder title="Profile" icon={<UserRound size={32} color={colors.primary} />} tab={go} />; }, [fontsLoaded, screen, location, phone]); return <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>{screenView}</KeyboardAvoidingView>; }
+function LocationPill({
+  location,
+  onPress,
+}: {
+  location: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={styles.locationPill}>
+      <MapPin size={15} color={colors.primary} />
+      <Text style={styles.locationText}>{location}</Text>
+      <ChevronDown size={14} color={colors.primary} />
+    </Pressable>
+  );
+}
 
-const styles = StyleSheet.create({ root:{flex:1,backgroundColor:colors.background}, safe:{flex:1,backgroundColor:colors.background}, header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingVertical:spacing.sm}, headerTitle:{fontFamily:typography.semibold,fontSize:17,color:colors.navy,flex:1,marginLeft:8}, scroll:{paddingHorizontal:spacing.md,paddingBottom:90}, splash:{flex:1,alignItems:'center',justifyContent:'center'}, splashCenter:{alignItems:'center'}, splashCopy:{color:colors.surface,fontFamily:typography.bold,fontSize:18,marginTop:spacing.md}, splashOrange:{color:colors.accent,fontFamily:typography.bold,fontSize:24}, splashLine:{position:'absolute',bottom:28,width:140,height:5,borderRadius:5,backgroundColor:colors.surface}, bgTool:{position:'absolute',top:120,left:35}, brand:{alignItems:'center'}, brandBox:{borderWidth:3,borderColor:colors.primary,paddingHorizontal:8,backgroundColor:'transparent'}, brandTop:{fontFamily:typography.bold,fontSize:32,lineHeight:34,color:colors.primary,letterSpacing:1}, brandBottom:{fontFamily:typography.bold,fontSize:29,lineHeight:33,color:colors.primary,borderTopWidth:2,borderColor:colors.primary}, brandTag:{fontFamily:typography.bold,fontSize:13,color:colors.primary,marginTop:4}, brandOrange:{color:colors.accent}, onboardTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',paddingTop:spacing.sm}, onboardCopy:{alignItems:'center',marginTop:spacing.xl}, heroTitle:{fontFamily:typography.bold,fontSize:27,lineHeight:34,color:colors.navy,textAlign:'center'}, bodyText:{fontFamily:typography.regular,fontSize:15,lineHeight:23,color:colors.muted,textAlign:'center',marginTop:spacing.sm}, bodyTextLeft:{fontFamily:typography.regular,fontSize:15,lineHeight:23,color:colors.muted,marginTop:4}, linkText:{fontFamily:typography.semibold,color:colors.primary}, mascot:{height:335,marginTop:spacing.lg,alignItems:'center',justifyContent:'center'}, mascotCircle:{width:235,height:235,borderRadius:120,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center'}, chip:{position:'absolute',left:0,top:55,backgroundColor:colors.surface,borderRadius:14,padding:12,flexDirection:'row',alignItems:'center',gap:7,shadowColor:'#0f1b3d',shadowOpacity:.08,shadowRadius:10,elevation:2}, chipMiddle:{top:210,left:0}, chipRight:{top:142,left:215}, chipText:{fontFamily:typography.medium,fontSize:12,color:colors.navy}, handNote:{position:'absolute',right:5,top:10,color:colors.primary,fontFamily:typography.semibold,fontSize:16,transform:[{rotate:'-7deg'}]}, dots:{flexDirection:'row',gap:8,justifyContent:'center',marginBottom:spacing.lg}, dot:{width:10,height:10,borderRadius:5,backgroundColor:'#D6E4F6'},dotActive:{backgroundColor:colors.primary,width:12,height:12},primary:{height:54,borderRadius:13,backgroundColor:colors.primaryDark,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:12,marginTop:spacing.md},primaryText:{color:colors.surface,fontFamily:typography.semibold,fontSize:17},disabled:{backgroundColor:'#AFC8E9'},pressed:{opacity:.8},underButton:{textAlign:'center',fontFamily:typography.regular,color:colors.muted,fontSize:13,marginTop:spacing.md},fort:{height:110,marginHorizontal:-spacing.md,marginTop:spacing.lg,overflow:'hidden',position:'relative',backgroundColor:'#EAF3FF'},fortShape:{position:'absolute',bottom:-35,left:0,right:0,height:85,borderTopLeftRadius:100,borderTopRightRadius:100,backgroundColor:'#CFE2FA'},fortText:{position:'absolute',zIndex:2,right:20,top:12,color:colors.primary,fontFamily:typography.semibold,fontSize:20,transform:[{rotate:'-8deg'}]},loginTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',paddingTop:spacing.sm},locationPill:{flexDirection:'row',alignItems:'center',gap:4,paddingVertical:7,paddingHorizontal:10,backgroundColor:colors.softBlue,borderRadius:radius.pill},locationText:{fontFamily:typography.medium,fontSize:11,color:colors.primary},tagline:{fontFamily:typography.regular,color:colors.muted,textAlign:'center',marginTop:spacing.sm},categoryRow:{flexDirection:'row',justifyContent:'space-between',marginVertical:spacing.lg},categoryMini:{alignItems:'center',width:'23%'},categoryIcon:{height:64,width:64,borderRadius:15,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center'},categoryLabel:{fontFamily:typography.medium,fontSize:12,color:colors.navy,textAlign:'center',marginTop:7},card:{backgroundColor:colors.surface,borderRadius:20,padding:spacing.md,shadowColor:'#0F1B3D',shadowOpacity:.07,shadowRadius:10,elevation:2},sectionTitle:{fontFamily:typography.bold,fontSize:27,color:colors.navy},field:{minHeight:54,borderWidth:1,borderColor:colors.line,borderRadius:13,backgroundColor:colors.surface,flexDirection:'row',alignItems:'center',paddingHorizontal:14,marginTop:12,gap:10},input:{flex:1,fontFamily:typography.regular,fontSize:15,color:colors.navy,minHeight:50},country:{fontFamily:typography.medium,color:colors.navy,borderRightWidth:1,borderColor:colors.line,paddingRight:12},divider:{flexDirection:'row',alignItems:'center',gap:10,marginTop:spacing.lg},dividerLine:{height:1,backgroundColor:colors.line,flex:1},dividerText:{fontFamily:typography.regular,color:colors.muted},socialRow:{flexDirection:'row',gap:10,marginTop:spacing.md},social:{height:52,borderWidth:1,borderColor:colors.line,borderRadius:13,flex:1,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8},socialText:{fontFamily:typography.medium,fontSize:11,color:colors.navy},google:{fontFamily:typography.bold,fontSize:22,color:'#4285F4'},apple:{color:'#111',fontSize:20},terms:{fontFamily:typography.regular,color:colors.muted,fontSize:11,textAlign:'center',marginTop:spacing.lg,lineHeight:18},forgotLink:{textAlign:'center',fontFamily:typography.medium,color:colors.primary,marginTop:spacing.md},toast:{position:'absolute',bottom:30,left:40,right:40,borderRadius:12,backgroundColor:colors.navy,padding:13,flexDirection:'row',justifyContent:'center',gap:8},toastText:{color:colors.surface,fontFamily:typography.medium},authHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingVertical:spacing.sm},iconButton:{width:44,height:44,alignItems:'center',justifyContent:'center'},stepText:{fontFamily:typography.semibold,color:colors.primary,fontSize:15},otpArt:{width:120,height:120,borderRadius:60,backgroundColor:colors.softBlue,alignSelf:'center',marginVertical:spacing.lg,alignItems:'center',justifyContent:'center'},otpBubble:{width:90,height:90,borderRadius:45,backgroundColor:colors.surface,alignItems:'center',justifyContent:'center'},otpRow:{flexDirection:'row',justifyContent:'space-between',marginTop:spacing.lg},otpBox:{width:45,height:55,borderWidth:1,borderColor:colors.line,borderRadius:12,backgroundColor:colors.surface,textAlign:'center',fontFamily:typography.semibold,fontSize:22,color:colors.navy},errorField:{borderColor:colors.danger},errorText:{fontFamily:typography.regular,color:colors.danger,fontSize:12,marginTop:5},resend:{fontFamily:typography.regular,color:colors.muted,fontSize:13,textAlign:'center',marginTop:spacing.md},badges:{flexDirection:'row',justifyContent:'space-between',marginTop:spacing.xl},badge:{alignItems:'center',gap:5},badgeText:{fontFamily:typography.regular,color:colors.muted,fontSize:9,textAlign:'center'},inlineButton:{backgroundColor:colors.primary,paddingHorizontal:14,height:40,borderRadius:10,justifyContent:'center'},inlineButtonText:{fontFamily:typography.semibold,color:colors.surface,fontSize:12},selectText:{flex:1,fontFamily:typography.medium,color:colors.navy},checkRow:{flexDirection:'row',alignItems:'center',gap:8,marginTop:spacing.md},checkbox:{height:22,width:22,borderRadius:5,borderWidth:1,borderColor:colors.line},checkboxOn:{backgroundColor:colors.primary,borderColor:colors.primary,alignItems:'center',justifyContent:'center'},termsSmall:{flex:1,fontFamily:typography.regular,color:colors.navy,fontSize:11},stepper:{flexDirection:'row',justifyContent:'space-between',marginVertical:spacing.lg},stepperItem:{alignItems:'center',width:'31%'},stepCircle:{width:38,height:38,borderRadius:19,alignItems:'center',justifyContent:'center'},stepDone:{backgroundColor:'#5A9BE8'},stepCurrent:{backgroundColor:colors.primary},stepNumber:{color:colors.surface,fontFamily:typography.bold},stepLabel:{fontFamily:typography.medium,fontSize:11,color:colors.navy,textAlign:'center',marginTop:5},profileTitle:{fontFamily:typography.bold,fontSize:26,color:colors.navy,marginTop:spacing.md},avatar:{alignItems:'center',marginVertical:spacing.lg},avatarText:{fontFamily:typography.semibold,color:colors.primary,textAlign:'center',marginTop:8},avatarMuted:{fontFamily:typography.regular,color:colors.muted},info:{backgroundColor:colors.softBlue,borderRadius:13,padding:14,flexDirection:'row',alignItems:'center',gap:12,marginTop:spacing.md},infoText:{fontFamily:typography.regular,color:colors.muted,fontSize:13,lineHeight:19},centerLink:{textAlign:'center',color:colors.primary,fontFamily:typography.medium,marginTop:spacing.xl},rules:{marginTop:spacing.md,gap:8},rule:{flexDirection:'row',alignItems:'center',gap:7},ruleText:{fontFamily:typography.regular,color:colors.muted,fontSize:13},ruleDone:{color:colors.success},screenTitle:{fontFamily:typography.semibold,fontSize:18,color:colors.navy},map:{height:190,borderRadius:18,backgroundColor:'#DDEBD9',overflow:'hidden',marginTop:spacing.md,position:'relative'},mapRoad:{position:'absolute',width:420,height:30,backgroundColor:'#F6F0D2',top:85,left:-30,transform:[{rotate:'25deg'}]},mapPin:{position:'absolute'},locationSearch:{height:52,borderWidth:1,borderColor:colors.line,borderRadius:13,backgroundColor:colors.surface,flexDirection:'row',alignItems:'center',paddingHorizontal:14,gap:8,marginTop:spacing.md},currentLocation:{flexDirection:'row',alignItems:'center',gap:8,marginVertical:spacing.md},locationSection:{marginBottom:spacing.md},locationSectionTitle:{flexDirection:'row',justifyContent:'space-between',marginBottom:4},smallTitle:{fontFamily:typography.semibold,fontSize:18,color:colors.navy},recentLocation:{flexDirection:'row',alignItems:'center',gap:10,backgroundColor:colors.surface,padding:14,borderRadius:12},cityGrid:{flexDirection:'row',flexWrap:'wrap',gap:10,marginTop:spacing.sm,marginBottom:spacing.md},city:{width:'23%',minHeight:52,borderWidth:1,borderColor:colors.line,borderRadius:11,alignItems:'center',justifyContent:'center',gap:2,backgroundColor:colors.surface},citySelected:{borderColor:colors.primary,backgroundColor:colors.softBlue},cityText:{fontFamily:typography.medium,fontSize:10,color:colors.navy},homeHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingTop:spacing.sm},homeActions:{flexDirection:'row',alignItems:'center',gap:7},homeGreeting:{fontFamily:typography.regular,color:colors.muted,marginTop:spacing.lg},homeTitle:{fontFamily:typography.bold,fontSize:23,color:colors.navy},banner:{borderRadius:18,padding:spacing.md,marginTop:spacing.md,flexDirection:'row',justifyContent:'space-between',overflow:'hidden'},bannerEyebrow:{fontFamily:typography.semibold,fontSize:10,color:'#CBE3FF'},bannerTitle:{fontFamily:typography.bold,fontSize:20,lineHeight:26,color:colors.surface,marginTop:5},bannerDots:{flexDirection:'row',justifyContent:'center',gap:6,marginVertical:10},sectionHeader:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:spacing.md},grid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',marginTop:spacing.sm},gridItem:{width:'23%',alignItems:'center',marginBottom:spacing.md},gridIcon:{width:52,height:52,borderRadius:15,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center'},gridLabel:{fontFamily:typography.medium,fontSize:11,color:colors.navy,textAlign:'center',marginTop:5},gridSub:{fontFamily:typography.regular,fontSize:8,color:colors.muted,textAlign:'center'},serviceRow:{backgroundColor:colors.surface,borderRadius:13,padding:10,flexDirection:'row',alignItems:'center',gap:10,marginTop:8},serviceThumb:{width:44,height:44,borderRadius:11,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center'},serviceInfo:{flex:1},serviceTitle:{fontFamily:typography.medium,color:colors.navy,fontSize:12},serviceDate:{fontFamily:typography.regular,color:colors.muted,fontSize:10,marginTop:2},completed:{fontFamily:typography.medium,color:colors.success,fontSize:9,backgroundColor:'#E7F7ED',paddingHorizontal:7,paddingVertical:4,borderRadius:8},urgent:{backgroundColor:'#FFF4E8',borderRadius:16,padding:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:spacing.lg},urgentTitle:{fontFamily:typography.semibold,color:colors.navy,fontSize:15},urgentText:{fontFamily:typography.regular,color:colors.muted,fontSize:11,marginTop:3},callButton:{backgroundColor:colors.orange,paddingVertical:11,paddingHorizontal:13,borderRadius:10,flexDirection:'row',gap:5,alignItems:'center'},callText:{fontFamily:typography.semibold,color:colors.surface,fontSize:11},popularRow:{gap:12,paddingVertical:spacing.md},popularCard:{width:185,backgroundColor:colors.surface,borderRadius:15,padding:12},popularIcon:{width:48,height:48,borderRadius:12,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center',marginBottom:8},tabs:{position:'absolute',bottom:0,left:0,right:0,height:76,backgroundColor:colors.surface,borderTopWidth:1,borderColor:colors.line,flexDirection:'row',justifyContent:'space-around',alignItems:'center'},tab:{alignItems:'center',gap:4,minWidth:55},tabLabel:{fontFamily:typography.medium,fontSize:10,color:colors.muted},tabActive:{color:colors.primary},placeholder:{flex:1,alignItems:'center',justifyContent:'center'},placeholderIcon:{width:70,height:70,borderRadius:35,backgroundColor:colors.softBlue,alignItems:'center',justifyContent:'center'} });
+function FortFooter() {
+  return (
+    <View style={styles.fortContainer}>
+      <Image
+        source={require('../assets/images/fort_footer.png')}
+        style={styles.fortImage}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
+
+function CategoryRow() {
+  return (
+    <View style={styles.categoryRowWrapper}>
+      <Image
+        source={require('../assets/images/categories_row.png')}
+        style={styles.categoryRowImg}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
+
+function Header({
+  onLocation,
+  onBack,
+  title,
+}: {
+  onLocation?: () => void;
+  onBack?: () => void;
+  title?: string;
+}) {
+  return (
+    <View style={styles.header}>
+      {onBack ? (
+        <Pressable onPress={onBack} style={styles.iconButton}>
+          <ArrowLeft size={24} color={colors.navy} />
+        </Pressable>
+      ) : (
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.headerLogoCompact}
+          resizeMode="contain"
+        />
+      )}
+      {title && <Text style={styles.headerTitle}>{title}</Text>}
+      {onLocation ? (
+        <LocationPill location="Bikaner, Rajasthan" onPress={onLocation} />
+      ) : (
+        <Bell size={22} color={colors.navy} />
+      )}
+    </View>
+  );
+}
+
+function AuthShell({
+  children,
+  scroll = true,
+}: {
+  children: React.ReactNode;
+  scroll?: boolean;
+}) {
+  return (
+    <SafeAreaView style={styles.safe}>
+      <StatusBar style="dark" />
+      {scroll ? (
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {children}
+        </ScrollView>
+      ) : (
+        children
+      )}
+    </SafeAreaView>
+  );
+}
+
+// 1. SPLASH SCREEN: Exact same visual as Image 1 (media_1790794717730.jpg)
+function Splash({ next }: { next: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(next, 2200);
+    return () => clearTimeout(timer);
+  }, [next]);
+
+  return (
+    <Pressable onPress={next} style={styles.splashScreen}>
+      <StatusBar style="light" />
+      <Image
+        source={require('../assets/images/splash_screen.png')}
+        style={styles.splashFullImage}
+        resizeMode="cover"
+      />
+    </Pressable>
+  );
+}
+
+// 2. ONBOARDING SCREEN: Exact same visual as Image 5 (media_1790794717760.jpg)
+function Onboarding({ next }: { next: (s: Screen) => void }) {
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <View style={{ width: 44 }} />
+        <Pressable onPress={() => next('login')}>
+          <Text style={styles.topActionText}>Skip</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.logoCentered}>
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.logoLight}
+          resizeMode="contain"
+        />
+      </View>
+
+      <View style={styles.onboardTextContainer}>
+        <Text style={styles.heroTitle}>
+          Reliable Home Services{'\n'}Now Just a Tap Away
+        </Text>
+        <Text style={styles.bodyTextCenter}>
+          Book verified professionals for electrical, plumbing, appliance repair, cleaning and more in your city.
+        </Text>
+      </View>
+
+      <View style={styles.onboardHeroContainer}>
+        <Image
+          source={require('../assets/images/onboard_hero.png')}
+          style={styles.onboardHeroImg}
+          resizeMode="contain"
+        />
+      </View>
+
+      <View style={styles.dotsRow}>
+        <View style={styles.dotActivePill} />
+        <View style={styles.dotInactive} />
+        <View style={styles.dotInactive} />
+      </View>
+
+      <PrimaryButton title="Get Started" onPress={() => next('login')} />
+
+      <Text style={styles.underButton}>
+        A smarter way to keep your home running.
+      </Text>
+
+      <FortFooter />
+    </AuthShell>
+  );
+}
+
+// 3. LOGIN / SIGN UP: Exact same visual as Image 4 (media_1790794717755.jpg)
+function Login({
+  next,
+  location,
+  onLocation,
+  onSubmit,
+}: {
+  next: (s: Screen) => void;
+  location: string;
+  onLocation: () => void;
+  onSubmit: (mobile: string) => void;
+}) {
+  const [mobile, setMobile] = useState('');
+  const [toast, setToast] = useState('');
+  const valid = /^[6-9]\d{9}$/.test(mobile);
+
+  const showToast = (t: string) => {
+    setToast(t);
+    setTimeout(() => setToast(''), 2000);
+  };
+
+  const handleContinue = () => {
+    if (valid) {
+      onSubmit(mobile);
+      next('otp');
+    } else {
+      next('create');
+    }
+  };
+
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <View style={{ width: 44 }} />
+        <LocationPill location={location} onPress={onLocation} />
+      </View>
+
+      <View style={styles.logoCentered}>
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.logoLight}
+          resizeMode="contain"
+        />
+      </View>
+
+      <Text style={styles.tagline}>
+        Trusted home services, right at your doorstep.
+      </Text>
+
+      <CategoryRow />
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Login or Sign Up</Text>
+        <Text style={styles.cardSubtitle}>
+          Enter your mobile number to continue
+        </Text>
+
+        <View style={[styles.fieldRow, !valid && mobile.length > 0 && styles.errorField]}>
+          <View style={styles.countryPicker}>
+            <Text style={styles.flagEmoji}>🇮🇳</Text>
+            <Text style={styles.countryText}>+91</Text>
+            <ChevronDown size={14} color="#6B7280" />
+          </View>
+          <View style={styles.vDivider} />
+          <TextInput
+            placeholder="Enter mobile number"
+            placeholderTextColor="#9AA5B8"
+            value={mobile}
+            onChangeText={(v) => setMobile(v.replace(/\D/g, '').slice(0, 10))}
+            keyboardType="phone-pad"
+            style={styles.textInput}
+          />
+        </View>
+
+        {!valid && mobile.length > 0 && (
+          <Text style={styles.errorText}>Enter a valid 10-digit mobile number</Text>
+        )}
+
+        <PrimaryButton
+          title="Continue"
+          disabled={mobile.length > 0 && !valid}
+          onPress={handleContinue}
+        />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or continue with</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <View style={styles.socialRow}>
+          <Pressable onPress={() => showToast('Google sign in demo')} style={styles.socialBtn}>
+            <Text style={styles.googleIcon}>G</Text>
+            <Text style={styles.socialBtnText}>Continue with Google</Text>
+          </Pressable>
+          <Pressable onPress={() => showToast('Apple sign in demo')} style={styles.socialBtn}>
+            <Text style={styles.appleIcon}>●</Text>
+            <Text style={styles.socialBtnText}>Continue with Apple</Text>
+          </Pressable>
+        </View>
+
+        <Text style={styles.termsText}>
+          By continuing, you agree to our{' '}
+          <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+          <Text style={styles.linkText}>Privacy Policy</Text>
+        </Text>
+
+        <Pressable onPress={() => next('create')} style={styles.switchAuth}>
+          <Text style={styles.switchAuthText}>
+            New here? <Text style={styles.linkTextBold}>Create Account</Text>
+          </Text>
+        </Pressable>
+      </View>
+
+      {toast ? <Toast text={toast} /> : null}
+      <FortFooter />
+    </AuthShell>
+  );
+}
+
+// 4. CREATE YOUR ACCOUNT: Exact same visual as Image 2 (media_1790794717739.jpg)
+// Fully editable credentials!
+function Create({
+  next,
+  location,
+  onLocation,
+  back,
+}: {
+  next: (s: Screen) => void;
+  location: string;
+  onLocation: () => void;
+  back: () => void;
+}) {
+  const [fullName, setFullName] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState('');
+  const [terms, setTerms] = useState(true);
+  const [otpSent, setOtpSent] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(30);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (otpSent && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((s) => (s > 0 ? s - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpSent, timerSeconds]);
+
+  const showToast = (t: string) => {
+    setToast(t);
+    setTimeout(() => setToast(''), 2200);
+  };
+
+  const handleSendOtp = () => {
+    if (mobile.length !== 10) {
+      showToast('Enter a valid 10-digit mobile number');
+      return;
+    }
+    setOtpSent(true);
+    setTimerSeconds(30);
+    setOtp('123456');
+    showToast('OTP sent: 123456');
+  };
+
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <Pressable onPress={back} style={styles.iconButton}>
+          <ArrowLeft size={24} color={colors.navy} />
+        </Pressable>
+        <Text style={styles.topStepIndicator}>Step 1 of 3</Text>
+      </View>
+
+      <View style={styles.logoCentered}>
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.logoLight}
+          resizeMode="contain"
+        />
+      </View>
+
+      <Text style={styles.tagline}>
+        Create your account and get started with{'\n'}trusted home services.
+      </Text>
+
+      <CategoryRow />
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Create Your Account</Text>
+        <Text style={styles.cardSubtitle}>Quick registration, almost there!</Text>
+
+        {/* 1. Full Name - fully editable */}
+        <View style={styles.fieldRow}>
+          <UserRound size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <TextInput
+            placeholder="Full Name"
+            placeholderTextColor="#9AA5B8"
+            value={fullName}
+            onChangeText={setFullName}
+            style={styles.textInput}
+            autoCapitalize="words"
+          />
+        </View>
+
+        {/* 2. Mobile Number with Send OTP button - fully editable */}
+        <View style={styles.fieldRow}>
+          <View style={styles.countryPicker}>
+            <Text style={styles.flagEmoji}>🇮🇳</Text>
+            <Text style={styles.countryText}>+91</Text>
+            <ChevronDown size={14} color="#6B7280" />
+          </View>
+          <View style={styles.vDivider} />
+          <TextInput
+            placeholder="Enter mobile number"
+            placeholderTextColor="#9AA5B8"
+            value={mobile}
+            onChangeText={(v) => setMobile(v.replace(/\D/g, '').slice(0, 10))}
+            keyboardType="phone-pad"
+            style={[styles.textInput, { flex: 1 }]}
+          />
+          <Pressable
+            onPress={handleSendOtp}
+            style={[styles.sendOtpBtn, otpSent && styles.sendOtpBtnActive]}
+          >
+            <Text style={styles.sendOtpBtnText}>
+              {otpSent ? 'Resend' : 'Send OTP'}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* 3. Enter OTP - fully editable */}
+        <View style={styles.fieldRow}>
+          <ShieldCheck size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <TextInput
+            placeholder="Enter OTP"
+            placeholderTextColor="#9AA5B8"
+            value={otp}
+            onChangeText={(v) => setOtp(v.replace(/\D/g, '').slice(0, 6))}
+            keyboardType="number-pad"
+            style={[styles.textInput, { flex: 1 }]}
+          />
+          <Pressable
+            onPress={handleSendOtp}
+            disabled={timerSeconds > 0 && otpSent}
+          >
+            <Text style={styles.resendInlineText}>
+              {otpSent && timerSeconds > 0
+                ? `Resend in ${timerSeconds}s`
+                : "Didn't receive? Resend in 30s"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* 4. Email Address - fully editable */}
+        <View style={styles.fieldRow}>
+          <MessageCircle size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <TextInput
+            placeholder="Email Address (Optional)"
+            placeholderTextColor="#9AA5B8"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.textInput}
+          />
+        </View>
+
+        {/* 5. Location - clickable */}
+        <Pressable onPress={onLocation} style={styles.fieldRow}>
+          <MapPin size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <Text style={styles.locationFieldValue}>
+            {location || 'Bikaner, Rajasthan'}
+          </Text>
+          <ChevronDown size={18} color="#102142" />
+        </Pressable>
+
+        {/* Terms Checkbox */}
+        <Pressable onPress={() => setTerms(!terms)} style={styles.checkboxRow}>
+          <View style={[styles.checkboxSquare, terms && styles.checkboxSquareChecked]}>
+            {terms && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
+          </View>
+          <Text style={styles.checkboxLabel}>
+            I agree to the <Text style={styles.linkText}>Terms of Service</Text> and{' '}
+            <Text style={styles.linkText}>Privacy Policy</Text>
+          </Text>
+        </Pressable>
+
+        {/* Create Account Button */}
+        <PrimaryButton
+          title="Create Account"
+          onPress={() => next('profile')}
+        />
+
+        <Pressable onPress={() => next('login')} style={styles.switchAuth}>
+          <Text style={styles.switchAuthText}>
+            Already have an account? <Text style={styles.linkTextBold}>Login</Text>
+          </Text>
+        </Pressable>
+      </View>
+
+      {toast ? <Toast text={toast} /> : null}
+      <FortFooter />
+    </AuthShell>
+  );
+}
+
+// 5. COMPLETE YOUR PROFILE: Exact same visual as Image 3 (media_1790794717732.jpg)
+// Fully editable credentials!
+function ProfileSetup({
+  next,
+  location,
+  onLocation,
+  back,
+}: {
+  next: (s: Screen) => void;
+  location: string;
+  onLocation: () => void;
+  back: () => void;
+}) {
+  const [fullName, setFullName] = useState('Rahul Sharma');
+  const [email, setEmail] = useState('rahul@example.com');
+  const [photoAdded, setPhotoAdded] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const showToast = (t: string) => {
+    setToast(t);
+    setTimeout(() => setToast(''), 2000);
+  };
+
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <Pressable onPress={back} style={styles.iconButton}>
+          <ArrowLeft size={24} color={colors.navy} />
+        </Pressable>
+        <Pressable onPress={() => next('home')}>
+          <Text style={styles.topActionText}>Skip for now</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.logoCentered}>
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.logoLight}
+          resizeMode="contain"
+        />
+      </View>
+
+      <Text style={styles.tagline}>
+        Just a few details to complete your profile.
+      </Text>
+
+      {/* Stepper matching Image 3 */}
+      <View style={styles.stepperContainer}>
+        <View style={styles.stepperItem}>
+          <View style={styles.stepCircleDone}>
+            <Check size={16} color="#FFFFFF" strokeWidth={3} />
+          </View>
+          <Text style={styles.stepLabelText}>Mobile{'\n'}Verified</Text>
+        </View>
+
+        <View style={styles.stepperLine} />
+
+        <View style={styles.stepperItem}>
+          <View style={styles.stepCircleDone}>
+            <Check size={16} color="#FFFFFF" strokeWidth={3} />
+          </View>
+          <Text style={styles.stepLabelText}>Create{'\n'}Account</Text>
+        </View>
+
+        <View style={styles.stepperLine} />
+
+        <View style={styles.stepperItem}>
+          <View style={styles.stepCircleActive}>
+            <Text style={styles.stepActiveNumber}>3</Text>
+          </View>
+          <Text style={[styles.stepLabelText, styles.stepLabelActive]}>
+            Profile{'\n'}Setup
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.profileHeading}>Complete Your Profile</Text>
+      <Text style={styles.profileSubheading}>
+        Help us serve you better with the right services.
+      </Text>
+
+      {/* Profile Photo Uploader */}
+      <Pressable
+        onPress={() => {
+          setPhotoAdded(!photoAdded);
+          showToast(photoAdded ? 'Photo removed' : 'Photo selected!');
+        }}
+        style={styles.avatarUploader}
+      >
+        <View style={styles.avatarCircleDashed}>
+          <View style={styles.avatarInnerBlue}>
+            <Camera size={34} color={colors.primary} />
+          </View>
+        </View>
+        <Text style={styles.avatarTitleText}>Add Profile Photo</Text>
+        <Text style={styles.avatarOptionalText}>(Optional)</Text>
+      </Pressable>
+
+      {/* Full Name Input - fully editable */}
+      <View style={styles.profileInputWrapper}>
+        <View style={styles.fieldRow}>
+          <UserRound size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.floatingLabel}>Full Name</Text>
+            <TextInput
+              placeholder="e.g. Rahul Sharma"
+              placeholderTextColor="#9AA5B8"
+              value={fullName}
+              onChangeText={setFullName}
+              style={styles.textInputWithLabel}
+            />
+          </View>
+        </View>
+
+        {/* Email Input - fully editable */}
+        <View style={styles.fieldRow}>
+          <MessageCircle size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.floatingLabel}>Email Address (Optional)</Text>
+            <TextInput
+              placeholder="e.g. rahul@example.com"
+              placeholderTextColor="#9AA5B8"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              style={styles.textInputWithLabel}
+            />
+          </View>
+        </View>
+
+        {/* Location Picker */}
+        <Pressable onPress={onLocation} style={styles.fieldRow}>
+          <MapPin size={20} color="#9AA5B8" style={styles.fieldIcon} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.floatingLabel}>Your Location</Text>
+            <Text style={styles.locationFieldValue}>
+              {location || 'Bikaner, Rajasthan'}
+            </Text>
+          </View>
+          <ChevronDown size={18} color="#102142" />
+        </Pressable>
+
+        {/* Info callout */}
+        <View style={styles.infoCallout}>
+          <View style={styles.infoHomeCircle}>
+            <HomeIcon size={20} color={colors.primary} />
+          </View>
+          <Text style={styles.infoCalloutText}>
+            Your location helps us show available{'\n'}services in your area.
+          </Text>
+        </View>
+      </View>
+
+      <PrimaryButton title="Continue" onPress={() => next('home')} />
+
+      {toast ? <Toast text={toast} /> : null}
+      <FortFooter />
+    </AuthShell>
+  );
+}
+
+// 6. OTP VERIFICATION SCREEN
+function Otp({
+  next,
+  phone,
+  back,
+}: {
+  next: (s: Screen) => void;
+  phone: string;
+  back: () => void;
+}) {
+  const [otp, setOtp] = useState('');
+  const [seconds, setSeconds] = useState(30);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const verify = () => {
+    if (otp !== '123456' && otp.length !== 6) {
+      setError('Please enter the 6-digit OTP (Mock: 123456)');
+      return;
+    }
+    next(Number(phone.slice(-1)) % 2 === 0 ? 'home' : 'create');
+  };
+
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <Pressable onPress={back} style={styles.iconButton}>
+          <ArrowLeft size={24} color={colors.navy} />
+        </Pressable>
+        <Text style={styles.topStepIndicator}>Secure Verification</Text>
+      </View>
+
+      <View style={styles.otpBubbleCircle}>
+        <LockKeyhole size={42} color={colors.primary} />
+      </View>
+
+      <Text style={styles.heroTitle}>Verify your mobile number</Text>
+      <Text style={styles.bodyTextCenter}>
+        We have sent a 6-digit OTP to{'\n'}+91 {phone || 'XXXXX XXXXX'}{' '}
+        <Text style={styles.linkText} onPress={back}>Edit</Text>
+      </Text>
+
+      <View style={styles.otpBoxesRow}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <TextInput
+            key={i}
+            maxLength={1}
+            keyboardType="number-pad"
+            value={otp[i] || ''}
+            onChangeText={(v) => {
+              const updated = (otp.slice(0, i) + v + otp.slice(i + 1)).slice(0, 6);
+              setOtp(updated);
+            }}
+            style={[styles.otpBoxSingle, error && styles.errorField]}
+          />
+        ))}
+      </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+      <Text style={styles.resendCenterText}>
+        Didn't receive it?{' '}
+        <Text
+          style={styles.linkText}
+          onPress={() => {
+            setSeconds(30);
+            setOtp('123456');
+          }}
+        >
+          {seconds ? `Resend in ${seconds}s` : 'Resend now'}
+        </Text>
+      </Text>
+
+      <PrimaryButton
+        title="Verify OTP"
+        disabled={otp.length !== 6}
+        onPress={verify}
+      />
+
+      <View style={styles.securityBadgesRow}>
+        {['Secure Verification', 'Quick Access', 'Join Thousands'].map((label) => (
+          <View key={label} style={styles.securityBadgeItem}>
+            <ShieldCheck size={18} color={colors.success} />
+            <Text style={styles.securityBadgeText}>{label}</Text>
+          </View>
+        ))}
+      </View>
+    </AuthShell>
+  );
+}
+
+// 7. LOCATION PICKER SCREEN
+function Location({
+  location,
+  setLocation,
+  back,
+}: {
+  location: string;
+  setLocation: (v: string) => void;
+  back: () => void;
+}) {
+  const [query, setQuery] = useState('');
+  const filtered = popularCities.filter((city) =>
+    city.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <AuthShell>
+      <View style={styles.topBar}>
+        <Pressable onPress={back} style={styles.iconButton}>
+          <ArrowLeft size={24} color={colors.navy} />
+        </Pressable>
+        <Text style={styles.topStepIndicator}>Select Location</Text>
+      </View>
+
+      <View style={styles.locationSearchBox}>
+        <Search size={20} color="#9AA5B8" />
+        <TextInput
+          placeholder="Search for your location"
+          placeholderTextColor="#9AA5B8"
+          value={query}
+          onChangeText={setQuery}
+          style={styles.textInput}
+        />
+      </View>
+
+      <Pressable
+        onPress={() => {
+          setLocation('Bikaner, Rajasthan');
+          back();
+        }}
+        style={styles.currentLocBtn}
+      >
+        <MapPin size={18} color={colors.primary} />
+        <Text style={styles.linkText}>Use Current Location</Text>
+      </Pressable>
+
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitleSmall}>Popular Cities</Text>
+      </View>
+
+      <View style={styles.cityGrid}>
+        {filtered.map((city) => (
+          <Pressable
+            key={city}
+            onPress={() => {
+              setLocation(city);
+              back();
+            }}
+            style={[styles.cityTile, location === city && styles.cityTileSelected]}
+          >
+            <MapPin
+              size={14}
+              color={location === city ? colors.primary : '#9AA5B8'}
+            />
+            <Text
+              style={[
+                styles.cityTileText,
+                location === city && styles.cityTileTextSelected,
+              ]}
+            >
+              {city}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <PrimaryButton title="Confirm Location" onPress={back} />
+    </AuthShell>
+  );
+}
+
+// 8. HOME DASHBOARD
+function Home({
+  location,
+  onLocation,
+  openCategories,
+  tab,
+}: {
+  location: string;
+  onLocation: () => void;
+  openCategories: () => void;
+  tab: (s: Screen) => void;
+}) {
+  return (
+    <AuthShell>
+      <View style={styles.homeTopRow}>
+        <Image
+          source={require('../assets/images/logo_light.png')}
+          style={styles.homeLogo}
+          resizeMode="contain"
+        />
+        <View style={styles.homeActionsRow}>
+          <LocationPill location={location} onPress={onLocation} />
+          <Bell size={22} color={colors.navy} />
+        </View>
+      </View>
+
+      <Text style={styles.homeGreetingText}>Hello, Rahul</Text>
+      <Text style={styles.homeHeadlineText}>How can we help today?</Text>
+
+      <View style={styles.locationSearchBox}>
+        <Search size={20} color="#9AA5B8" />
+        <TextInput
+          placeholder="Search for a service"
+          placeholderTextColor="#9AA5B8"
+          style={styles.textInput}
+        />
+      </View>
+
+      <LinearGradient colors={['#1E63C6', '#0F4EA7']} style={styles.bannerCard}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.bannerEyebrow}>FAST, RELIABLE & LOCAL</Text>
+          <Text style={styles.bannerHeading}>
+            Fix it today.{'\n'}We'll handle the rest.
+          </Text>
+          <Pressable onPress={openCategories} style={styles.bannerBookBtn}>
+            <Text style={styles.bannerBookBtnText}>Book a Service</Text>
+          </Pressable>
+        </View>
+        <Wrench size={74} color="#ffffff88" />
+      </LinearGradient>
+
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitleSmall}>Service Categories</Text>
+        <Pressable onPress={openCategories}>
+          <Text style={styles.linkText}>See All</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.homeCategoriesGrid}>
+        {categories.slice(0, 8).map(([name, sub, icon]) => (
+          <Pressable
+            key={name}
+            onPress={openCategories}
+            style={styles.homeCategoryItem}
+          >
+            <View style={styles.homeCategoryIconBox}>
+              <Sparkles size={24} color={colors.primary} />
+            </View>
+            <Text style={styles.homeCategoryLabel} numberOfLines={2}>
+              {name}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitleSmall}>Recent Services</Text>
+        <Text style={styles.linkText}>View All</Text>
+      </View>
+
+      {recentServices.map(([title, date]) => (
+        <View key={title} style={styles.recentServiceCard}>
+          <View style={styles.recentServiceIconBox}>
+            <Wrench size={20} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.recentServiceTitle}>{title}</Text>
+            <Text style={styles.recentServiceDate}>{date}</Text>
+          </View>
+          <Text style={styles.recentStatusCompleted}>Completed</Text>
+          <ChevronRight size={18} color="#9AA5B8" />
+        </View>
+      ))}
+
+      <View style={{ height: 90 }} />
+      <BottomTabs active="home" tab={tab} />
+    </AuthShell>
+  );
+}
+
+// 9. CATEGORIES EXPLORER
+function Categories({
+  location,
+  onLocation,
+  back,
+  tab,
+}: {
+  location: string;
+  onLocation: () => void;
+  back: () => void;
+  tab: (s: Screen) => void;
+}) {
+  return (
+    <AuthShell>
+      <Header onBack={back} title="Service Categories" onLocation={onLocation} />
+      <Text style={styles.profileHeading}>Service Categories</Text>
+      <Text style={styles.profileSubheading}>What can we help you with?</Text>
+
+      <View style={styles.locationSearchBox}>
+        <Search size={20} color="#9AA5B8" />
+        <TextInput
+          placeholder="Search services"
+          placeholderTextColor="#9AA5B8"
+          style={styles.textInput}
+        />
+      </View>
+
+      <View style={styles.homeCategoriesGrid}>
+        {categories.map(([name, sub]) => (
+          <View key={name} style={styles.homeCategoryItem}>
+            <View style={styles.homeCategoryIconBox}>
+              <Sparkles size={24} color={colors.primary} />
+            </View>
+            <Text style={styles.homeCategoryLabel}>{name}</Text>
+            <Text style={styles.homeCategorySubLabel}>{sub}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={{ height: 90 }} />
+      <BottomTabs active="categories" tab={tab} />
+    </AuthShell>
+  );
+}
+
+// 10. PLACEHOLDER FOR TABS
+function Placeholder({
+  title,
+  icon,
+  tab,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  tab: (s: Screen) => void;
+}) {
+  return (
+    <AuthShell>
+      <View style={styles.placeholderContainer}>
+        <View style={styles.placeholderIconBox}>{icon}</View>
+        <Text style={styles.profileHeading}>{title}</Text>
+        <Text style={styles.bodyTextCenter}>Coming soon</Text>
+      </View>
+      <BottomTabs active={title.toLowerCase()} tab={tab} />
+    </AuthShell>
+  );
+}
+
+// BOTTOM TABS
+function BottomTabs({
+  active,
+  tab,
+}: {
+  active: string;
+  tab: (s: Screen) => void;
+}) {
+  const tabs = [
+    { key: 'home', label: 'Home', icon: HomeIcon },
+    { key: 'categories', label: 'Categories', icon: Sparkles },
+    { key: 'bookings', label: 'Bookings', icon: CalendarDays },
+    { key: 'messages', label: 'Messages', icon: MessageCircle },
+    { key: 'profile', label: 'Profile', icon: UserRound },
+  ];
+
+  return (
+    <View style={styles.bottomTabsBar}>
+      {tabs.map((t) => {
+        const IconComponent = t.icon;
+        const isActive = active === t.key;
+        return (
+          <Pressable
+            key={t.key}
+            onPress={() =>
+              tab(
+                t.key === 'home'
+                  ? 'home'
+                  : t.key === 'categories'
+                  ? 'categories'
+                  : t.key === 'bookings'
+                  ? 'bookings'
+                  : t.key === 'messages'
+                  ? 'messages'
+                  : 'profileTab'
+              )
+            }
+            style={styles.tabButton}
+          >
+            <IconComponent
+              size={21}
+              color={isActive ? colors.primary : '#9AA5B8'}
+            />
+            <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
+              {t.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// ROOT MAIN COMPONENT
+export default function Index() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  const [screen, setScreen] = useState<Screen>('splash');
+  const [location, setLocation] = useState('Bikaner, Rajasthan');
+  const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    Promise.all([
+      AsyncStorage.getItem('nowfix_onboarding'),
+      AsyncStorage.getItem('nowfix_logged_in'),
+    ]).then(([seen, loggedIn]) => {
+      // Keep splash first as user requested
+    });
+  }, []);
+
+  const go = (nextScreen: Screen) => {
+    setScreen(nextScreen);
+    if (nextScreen === 'login') AsyncStorage.setItem('nowfix_onboarding', 'true');
+    if (nextScreen === 'home') AsyncStorage.setItem('nowfix_logged_in', 'true');
+  };
+
+  const screenView = useMemo(() => {
+    if (!fontsLoaded) return null;
+
+    if (screen === 'splash') return <Splash next={() => go('onboarding')} />;
+    if (screen === 'onboarding') return <Onboarding next={go} />;
+    if (screen === 'login') {
+      return (
+        <Login
+          next={go}
+          onSubmit={setPhone}
+          location={location}
+          onLocation={() => go('location')}
+        />
+      );
+    }
+    if (screen === 'otp') {
+      return <Otp next={go} phone={phone} back={() => go('login')} />;
+    }
+    if (screen === 'create') {
+      return (
+        <Create
+          next={go}
+          location={location}
+          onLocation={() => go('location')}
+          back={() => go('login')}
+        />
+      );
+    }
+    if (screen === 'profile') {
+      return (
+        <ProfileSetup
+          next={go}
+          location={location}
+          onLocation={() => go('location')}
+          back={() => go('create')}
+        />
+      );
+    }
+    if (screen === 'location') {
+      return (
+        <Location
+          location={location}
+          setLocation={setLocation}
+          back={() => go('login')}
+        />
+      );
+    }
+    if (screen === 'home') {
+      return (
+        <Home
+          location={location}
+          onLocation={() => go('location')}
+          openCategories={() => go('categories')}
+          tab={go}
+        />
+      );
+    }
+    if (screen === 'categories') {
+      return (
+        <Categories
+          location={location}
+          onLocation={() => go('location')}
+          back={() => go('home')}
+          tab={go}
+        />
+      );
+    }
+    if (screen === 'bookings') {
+      return (
+        <Placeholder
+          title="Bookings"
+          icon={<CalendarDays size={32} color={colors.primary} />}
+          tab={go}
+        />
+      );
+    }
+    if (screen === 'messages') {
+      return (
+        <Placeholder
+          title="Messages"
+          icon={<MessageCircle size={32} color={colors.primary} />}
+          tab={go}
+        />
+      );
+    }
+    return (
+      <Placeholder
+        title="Profile"
+        icon={<UserRound size={32} color={colors.primary} />}
+        tab={go}
+      />
+    );
+  }, [fontsLoaded, screen, location, phone]);
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {screenView}
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
+  safe: { flex: 1, backgroundColor: '#FFFFFF' },
+  scroll: { paddingHorizontal: 16, paddingBottom: 24 },
+
+  // Splash Screen (Full Screen Image from Image 1)
+  splashScreen: {
+    flex: 1,
+    backgroundColor: '#1E62C1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splashFullImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+
+  // Top Bars & Headers
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  topActionText: {
+    fontFamily: typography.semibold,
+    color: colors.primary,
+    fontSize: 15,
+  },
+  topStepIndicator: {
+    fontFamily: typography.semibold,
+    color: colors.primary,
+    fontSize: 15,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  headerTitle: {
+    fontFamily: typography.semibold,
+    fontSize: 17,
+    color: colors.navy,
+    flex: 1,
+    marginLeft: 10,
+  },
+  headerLogoCompact: {
+    width: 100,
+    height: 38,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Centered Light Logo (matching screenshots)
+  logoCentered: {
+    alignItems: 'center',
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  logoLight: {
+    width: 220,
+    height: 155,
+  },
+
+  // Taglines & Hero Texts
+  tagline: {
+    fontFamily: typography.regular,
+    fontSize: 13,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 12,
+    lineHeight: 19,
+  },
+  onboardTextContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 8,
+  },
+  heroTitle: {
+    fontFamily: typography.bold,
+    fontSize: 22,
+    lineHeight: 30,
+    color: colors.navy,
+    textAlign: 'center',
+  },
+  bodyTextCenter: {
+    fontFamily: typography.regular,
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+
+  // Onboarding Hero (Image 5)
+  onboardHeroContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+    marginBottom: 16,
+  },
+  onboardHeroImg: {
+    width: '100%',
+    height: 285,
+  },
+
+  // Dots
+  dotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    marginVertical: 16,
+  },
+  dotActivePill: {
+    width: 22,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
+  },
+  dotInactive: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#D6E4F6',
+  },
+
+  // Primary Action Button
+  primaryButton: {
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  primaryButtonDisabled: {
+    backgroundColor: '#AFC8E9',
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontFamily: typography.semibold,
+    fontSize: 16,
+  },
+  underButton: {
+    textAlign: 'center',
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 12,
+    marginTop: 12,
+  },
+
+  // Fort Footer (Watercolor architecture silhouette)
+  fortContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 18,
+    overflow: 'hidden',
+  },
+  fortImage: {
+    width: '100%',
+    height: 110,
+  },
+
+  // Categories Row (Row of 4 icons from Image 2 & 4)
+  categoryRowWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 12,
+  },
+  categoryRowImg: {
+    width: '100%',
+    height: 82,
+  },
+
+  // Main Card Container (White with subtle shadow)
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 8,
+    shadowColor: '#0F1B3D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F0F4FA',
+  },
+  cardTitle: {
+    fontFamily: typography.bold,
+    fontSize: 22,
+    color: colors.navy,
+  },
+  cardSubtitle: {
+    fontFamily: typography.regular,
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 3,
+    marginBottom: 12,
+  },
+
+  // Input Fields & Rows
+  fieldRow: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: '#DFE7F3',
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginTop: 10,
+    gap: 8,
+  },
+  fieldIcon: {
+    marginRight: 2,
+  },
+  textInput: {
+    flex: 1,
+    fontFamily: typography.regular,
+    fontSize: 14,
+    color: colors.navy,
+    minHeight: 46,
+  },
+  floatingLabel: {
+    fontFamily: typography.medium,
+    fontSize: 10,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  textInputWithLabel: {
+    fontFamily: typography.regular,
+    fontSize: 14,
+    color: colors.navy,
+    paddingTop: 1,
+    paddingBottom: 2,
+  },
+  locationFieldValue: {
+    fontFamily: typography.medium,
+    fontSize: 13,
+    color: colors.navy,
+    flex: 1,
+  },
+  errorField: {
+    borderColor: colors.danger,
+  },
+  errorText: {
+    fontFamily: typography.regular,
+    color: colors.danger,
+    fontSize: 12,
+    marginTop: 4,
+  },
+
+  // Country Code Picker
+  countryPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingRight: 6,
+  },
+  flagEmoji: {
+    fontSize: 16,
+  },
+  countryText: {
+    fontFamily: typography.medium,
+    fontSize: 14,
+    color: colors.navy,
+  },
+  vDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#DFE7F3',
+    marginRight: 4,
+  },
+
+  // Inline Send OTP button
+  sendOtpBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  sendOtpBtnActive: {
+    backgroundColor: '#1052B3',
+  },
+  sendOtpBtnText: {
+    color: '#FFFFFF',
+    fontFamily: typography.semibold,
+    fontSize: 12,
+  },
+  resendInlineText: {
+    fontFamily: typography.medium,
+    color: colors.primary,
+    fontSize: 11,
+  },
+
+  // Checkbox
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  checkboxSquare: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#CBD7E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  checkboxSquareChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontFamily: typography.regular,
+    fontSize: 11,
+    color: colors.navy,
+  },
+
+  // Links & Dividers
+  linkText: {
+    fontFamily: typography.semibold,
+    color: colors.primary,
+  },
+  linkTextBold: {
+    fontFamily: typography.bold,
+    color: colors.primary,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 10,
+  },
+  dividerLine: {
+    height: 1,
+    backgroundColor: '#DFE7F3',
+    flex: 1,
+  },
+  dividerText: {
+    fontFamily: typography.regular,
+    color: '#9AA5B8',
+    fontSize: 12,
+  },
+
+  // Social Buttons
+  socialRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 6,
+  },
+  socialBtn: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#DFE7F3',
+    borderRadius: 12,
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  socialBtnText: {
+    fontFamily: typography.medium,
+    fontSize: 11,
+    color: colors.navy,
+  },
+  googleIcon: {
+    fontFamily: typography.bold,
+    fontSize: 18,
+    color: '#4285F4',
+  },
+  appleIcon: {
+    fontSize: 16,
+    color: '#111111',
+  },
+  termsText: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 14,
+    lineHeight: 18,
+  },
+  switchAuth: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  switchAuthText: {
+    fontFamily: typography.regular,
+    fontSize: 13,
+    color: colors.navy,
+  },
+
+  // Profile Setup Screen (Image 3)
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 14,
+    paddingHorizontal: 16,
+  },
+  stepperItem: {
+    alignItems: 'center',
+    width: 60,
+  },
+  stepperLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: '#5A9BE8',
+    marginHorizontal: 4,
+    marginBottom: 20,
+  },
+  stepCircleDone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#5A9BE8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepCircleActive: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepActiveNumber: {
+    color: '#FFFFFF',
+    fontFamily: typography.bold,
+    fontSize: 14,
+  },
+  stepLabelText: {
+    fontFamily: typography.medium,
+    fontSize: 10,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 13,
+  },
+  stepLabelActive: {
+    color: colors.primary,
+    fontFamily: typography.semibold,
+  },
+  profileHeading: {
+    fontFamily: typography.bold,
+    fontSize: 22,
+    color: colors.navy,
+    marginTop: 10,
+  },
+  profileSubheading: {
+    fontFamily: typography.regular,
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 3,
+  },
+  avatarUploader: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  avatarCircleDashed: {
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    borderWidth: 1.8,
+    borderColor: '#7EAFEB',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0F6FF',
+  },
+  avatarInnerBlue: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: '#E4EFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarTitleText: {
+    fontFamily: typography.semibold,
+    color: colors.primary,
+    fontSize: 13,
+    marginTop: 8,
+  },
+  avatarOptionalText: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 11,
+  },
+  profileInputWrapper: {
+    gap: 6,
+  },
+  infoCallout: {
+    backgroundColor: '#EEF5FE',
+    borderRadius: 14,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 10,
+  },
+  infoHomeCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoCalloutText: {
+    fontFamily: typography.regular,
+    color: '#556885',
+    fontSize: 12,
+    lineHeight: 18,
+    flex: 1,
+  },
+
+  // Location Pills
+  locationPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: colors.softBlue,
+    borderRadius: radius.pill,
+  },
+  locationText: {
+    fontFamily: typography.medium,
+    fontSize: 11,
+    color: colors.primary,
+  },
+
+  // OTP Screen
+  otpBubbleCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#EEF5FE',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 16,
+  },
+  otpBoxesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  otpBoxSingle: {
+    width: 46,
+    height: 54,
+    borderWidth: 1.5,
+    borderColor: '#DFE7F3',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    textAlign: 'center',
+    fontFamily: typography.semibold,
+    fontSize: 22,
+    color: colors.navy,
+  },
+  resendCenterText: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  securityBadgesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  securityBadgeItem: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  securityBadgeText: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 10,
+  },
+
+  // Location Selector
+  locationSearchBox: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#DFE7F3',
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    gap: 8,
+    marginTop: 10,
+  },
+  currentLocBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginVertical: 14,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  sectionTitleSmall: {
+    fontFamily: typography.semibold,
+    fontSize: 16,
+    color: colors.navy,
+  },
+  cityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  cityTile: {
+    width: '23%',
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: '#DFE7F3',
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    backgroundColor: '#FFFFFF',
+    padding: 4,
+  },
+  cityTileSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.softBlue,
+  },
+  cityTileText: {
+    fontFamily: typography.medium,
+    fontSize: 10,
+    color: colors.navy,
+    textAlign: 'center',
+  },
+  cityTileTextSelected: {
+    color: colors.primary,
+  },
+
+  // Home Dashboard
+  homeTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 6,
+  },
+  homeLogo: {
+    width: 100,
+    height: 38,
+  },
+  homeActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  homeGreetingText: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    marginTop: 14,
+    fontSize: 14,
+  },
+  homeHeadlineText: {
+    fontFamily: typography.bold,
+    fontSize: 22,
+    color: colors.navy,
+    marginBottom: 6,
+  },
+  bannerCard: {
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  bannerEyebrow: {
+    fontFamily: typography.semibold,
+    fontSize: 10,
+    color: '#CBE3FF',
+    letterSpacing: 0.5,
+  },
+  bannerHeading: {
+    fontFamily: typography.bold,
+    fontSize: 18,
+    lineHeight: 24,
+    color: '#FFFFFF',
+    marginTop: 4,
+  },
+  bannerBookBtn: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  bannerBookBtnText: {
+    fontFamily: typography.semibold,
+    fontSize: 12,
+    color: colors.primary,
+  },
+  homeCategoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  homeCategoryItem: {
+    width: '23%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  homeCategoryIconBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: colors.softBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  homeCategoryLabel: {
+    fontFamily: typography.medium,
+    fontSize: 11,
+    color: colors.navy,
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  homeCategorySubLabel: {
+    fontFamily: typography.regular,
+    fontSize: 9,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  recentServiceCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 13,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#F0F4FA',
+  },
+  recentServiceIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: colors.softBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentServiceTitle: {
+    fontFamily: typography.medium,
+    color: colors.navy,
+    fontSize: 13,
+  },
+  recentServiceDate: {
+    fontFamily: typography.regular,
+    color: '#6B7280',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  recentStatusCompleted: {
+    fontFamily: typography.medium,
+    color: colors.success,
+    fontSize: 10,
+    backgroundColor: '#E7F7ED',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+
+  // Bottom Navigation Bar
+  bottomTabsBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 70,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderColor: '#DFE7F3',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  tabButton: {
+    alignItems: 'center',
+    gap: 3,
+    minWidth: 54,
+  },
+  tabLabel: {
+    fontFamily: typography.medium,
+    fontSize: 10,
+    color: '#9AA5B8',
+  },
+  tabLabelActive: {
+    color: colors.primary,
+  },
+  placeholderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 80,
+  },
+  placeholderIconBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.softBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+
+  // Toast
+  toast: {
+    position: 'absolute',
+    bottom: 24,
+    left: 30,
+    right: 30,
+    borderRadius: 12,
+    backgroundColor: colors.navy,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 4,
+  },
+  toastText: {
+    color: '#FFFFFF',
+    fontFamily: typography.medium,
+    fontSize: 13,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+});

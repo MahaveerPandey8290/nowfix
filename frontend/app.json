@@ -8,6 +8,11 @@
     "scheme": "nowfix",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash_screen.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#1E62C1"
+    },
     "ios": {
       "supportsTablet": true
     },

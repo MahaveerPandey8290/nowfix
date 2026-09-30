@@ -221,12 +221,12 @@ function Splash({ next }: { next: () => void }) {
   }, [next]);
 
   return (
-    <Pressable onPress={next} style={{ flex: 1 }}>
+    <Pressable onPress={next} style={styles.splashContainer}>
       <StatusBar style="light" />
       <Image
         source={require('../assets/images/splash_screen.png')}
-        style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        style={styles.splashImage}
+        resizeMode="contain"
       />
     </Pressable>
   );
@@ -1205,6 +1205,18 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F5F9FF' },
   safe: { flex: 1, backgroundColor: '#F5F9FF' },
   scrollContent: { paddingHorizontal: 16, paddingBottom: 24 },
+
+  // Splash
+  splashContainer: {
+    flex: 1,
+    backgroundColor: '#1D5EBA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splashImage: {
+    width: '100%',
+    height: '100%',
+  },
 
   // Top bars
   topBar: {

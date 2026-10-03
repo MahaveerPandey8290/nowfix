@@ -69,7 +69,10 @@ import {
   Share2,
   FileText,
   Sliders,
+  Eye,
+  EyeOff,
 } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 import {
   categories,
   searchResults,
@@ -226,70 +229,23 @@ function BottomNavigation({
   );
 }
 
-// ─── 1. SPLASH SCREEN (Pixel Perfect + Tagline + Loading Bar) ─────────────────
+// ─── 1. SPLASH SCREEN (Pixel Perfect Fullscreen Branding) ─────────────────────
 function SplashScreenView({ onComplete }: { onComplete: () => void }) {
-  const [progress] = useState(new Animated.Value(0));
-
   useEffect(() => {
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 2200,
-      useNativeDriver: false,
-    }).start(() => {
+    const timer = setTimeout(() => {
       onComplete();
-    });
-  }, [onComplete, progress]);
-
-  const progressWidth = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
+    }, 2400);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
   return (
     <Pressable onPress={onComplete} style={styles.splashContainer}>
       <StatusBar style="light" />
-
-      {/* Decorative outline background watermarks */}
-      <View style={styles.splashWatermarkTopLeft}>
-        <Wrench size={120} color="rgba(255,255,255,0.06)" />
-      </View>
-      <View style={styles.splashWatermarkBottomRight}>
-        <HomeIcon size={140} color="rgba(255,255,255,0.06)" />
-      </View>
-      <View style={styles.splashWatermarkMidRight}>
-        <Zap size={90} color="rgba(255,255,255,0.05)" />
-      </View>
-
-      {/* Center Branding Block */}
-      <View style={styles.splashCenterContent}>
-        {/* White Border Logo Box */}
-        <View style={styles.splashLogoBox}>
-          <View style={styles.splashLogoRowTop}>
-            <Text style={styles.splashLogoNow}>NOW</Text>
-            <ArrowRight size={24} color="#FFFFFF" strokeWidth={3} style={{ transform: [{ rotate: '-45deg' }] }} />
-          </View>
-          <View style={styles.splashLogoDivider} />
-          <View style={styles.splashLogoRowBottom}>
-            <Text style={styles.splashLogoFix}>FIX</Text>
-            <View style={styles.splashToolsWrap}>
-              <Wrench size={22} color="#F59E0B" strokeWidth={2.5} style={{ transform: [{ rotate: '45deg' }] }} />
-              <Hammer size={22} color="#F59E0B" strokeWidth={2.5} style={{ transform: [{ rotate: '-45deg' }], position: 'absolute' }} />
-            </View>
-          </View>
-        </View>
-
-        {/* Tagline: Clear & High Contrast */}
-        <Text style={styles.splashTaglineTop}>FIX ANY PROBLEM</Text>
-        <Text style={styles.splashTaglineBottom}>INSTANTLY</Text>
-      </View>
-
-      {/* Bottom Loading Progress Bar */}
-      <View style={styles.splashBottomFooter}>
-        <View style={styles.splashProgressBarBg}>
-          <Animated.View style={[styles.splashProgressBarFill, { width: progressWidth }]} />
-        </View>
-        <Text style={styles.splashLoadingText}>Loading...</Text>
-      </View>
+      <Image
+        source={require('../assets/images/splash_screen.png')}
+        style={styles.splashFullscreenImage}
+        resizeMode="cover"
+      />
     </Pressable>
   );
 }
@@ -345,6 +301,40 @@ function OnboardingScreenView({
   );
 }
 
+function GoogleIcon({ size = 20 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+      />
+      <Path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+      />
+      <Path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.94 0 12s.45 3.84 1.25 5.42l4.03-3.15z"
+      />
+      <Path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+      />
+    </Svg>
+  );
+}
+
+function AppleIcon({ size = 20, color = '#000000' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        fill={color}
+        d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.58.67-1.08 1.74-.95 2.77 1.01.08 2.04-.52 2.66-1.27z"
+      />
+    </Svg>
+  );
+}
+
 // ─── 3. LOGIN / SIGN UP SCREEN (Tab Switcher + Social Auth) ───────────────────
 function AuthScreenView({
   onAuthenticate,
@@ -354,8 +344,9 @@ function AuthScreenView({
   onForgotPassword: () => void;
 }) {
   const [tab, setTab] = useState<'login' | 'signup'>('login');
-  const [phone, setPhone] = useState('9876543210');
-  const [password, setPassword] = useState('••••••••');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
 
@@ -375,7 +366,10 @@ function AuthScreenView({
         {/* Header Title */}
         <View style={styles.authHeaderBox}>
           <Text style={styles.authMainTitle}>Welcome to</Text>
-          <Text style={styles.authBrandTitle}>NowFix</Text>
+          <View style={styles.authBrandRow}>
+            <Text style={styles.authBrandNow}>Now</Text>
+            <Text style={styles.authBrandFix}>Fix</Text>
+          </View>
           <Text style={styles.authSubtitle}>Login or create an account to continue</Text>
         </View>
 
@@ -417,7 +411,6 @@ function AuthScreenView({
           {/* Phone Input with +91 */}
           <View style={styles.authInputWrap}>
             <Text style={styles.authCountryCode}>+91</Text>
-            <View style={styles.authInputDivider} />
             <TextInput
               placeholder="Phone Number"
               placeholderTextColor="#94A3B8"
@@ -428,17 +421,24 @@ function AuthScreenView({
             />
           </View>
 
-          {/* Password Input */}
+          {/* Password Input with Show/Hide Toggle */}
           <View style={styles.authInputWrap}>
             <LockKeyhole size={18} color="#94A3B8" />
             <TextInput
               placeholder={tab === 'login' ? 'Password' : 'Create Password'}
               placeholderTextColor="#94A3B8"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
               style={styles.authTextInput}
             />
+            <Pressable onPress={() => setShowPassword(!showPassword)} hitSlop={10}>
+              {showPassword ? (
+                <EyeOff size={18} color="#94A3B8" />
+              ) : (
+                <Eye size={18} color="#94A3B8" />
+              )}
+            </Pressable>
           </View>
 
           {tab === 'login' && (
@@ -465,12 +465,12 @@ function AuthScreenView({
 
           {/* Social Auth Buttons */}
           <Pressable onPress={handleSubmit} style={styles.socialAuthBtn}>
-            <Text style={styles.socialGoogleG}>G</Text>
+            <GoogleIcon size={18} />
             <Text style={styles.socialAuthBtnText}>Continue with Google</Text>
           </Pressable>
 
           <Pressable onPress={handleSubmit} style={styles.socialAuthBtn}>
-            <Text style={styles.socialAppleLogo}></Text>
+            <AppleIcon size={18} color="#000000" />
             <Text style={styles.socialAuthBtnText}>Continue with Apple</Text>
           </Pressable>
 
@@ -3147,115 +3147,11 @@ const styles = StyleSheet.create({
   // 1. Splash Screen
   splashContainer: {
     flex: 1,
-    backgroundColor: '#1E62C1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+    backgroundColor: '#1E60E2',
   },
-  splashWatermarkTopLeft: {
-    position: 'absolute',
-    top: 60,
-    left: -20,
-    transform: [{ rotate: '-15deg' }],
-  },
-  splashWatermarkBottomRight: {
-    position: 'absolute',
-    bottom: 100,
-    right: -20,
-    transform: [{ rotate: '15deg' }],
-  },
-  splashWatermarkMidRight: {
-    position: 'absolute',
-    top: '35%',
-    right: -10,
-  },
-  splashCenterContent: {
-    alignItems: 'center',
-  },
-  splashLogoBox: {
-    width: 250,
-    height: 140,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    justifyContent: 'space-between',
-  },
-  splashLogoRowTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  splashLogoNow: {
-    fontFamily: typography.bold,
-    fontSize: 42,
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    lineHeight: 46,
-  },
-  splashLogoDivider: {
-    height: 2,
-    backgroundColor: '#FFFFFF',
-    marginVertical: 4,
-  },
-  splashLogoRowBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  splashLogoFix: {
-    fontFamily: typography.bold,
-    fontSize: 42,
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    lineHeight: 46,
-  },
-  splashToolsWrap: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  splashTaglineTop: {
-    fontFamily: typography.bold,
-    fontSize: 16,
-    color: '#FFFFFF',
-    letterSpacing: 2.5,
-    marginTop: 22,
-    textAlign: 'center',
-  },
-  splashTaglineBottom: {
-    fontFamily: typography.bold,
-    fontSize: 22,
-    color: '#F59E0B',
-    letterSpacing: 2.5,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  splashBottomFooter: {
-    position: 'absolute',
-    bottom: 50,
-    width: '60%',
-    alignItems: 'center',
-  },
-  splashProgressBarBg: {
+  splashFullscreenImage: {
     width: '100%',
-    height: 5,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  splashProgressBarFill: {
     height: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 3,
-  },
-  splashLoadingText: {
-    fontFamily: typography.regular,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
   },
 
   // 2. Onboarding
@@ -3370,35 +3266,44 @@ const styles = StyleSheet.create({
   // 3. Auth Screen
   authScrollContent: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 20,
   },
   authHeaderBox: {
-    marginTop: 12,
-    marginBottom: 20,
+    marginTop: 16,
+    marginBottom: 24,
   },
   authMainTitle: {
     fontFamily: typography.medium,
-    fontSize: 16,
-    color: '#64748B',
+    fontSize: 20,
+    color: '#0F172A',
+    marginBottom: 2,
   },
-  authBrandTitle: {
+  authBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  authBrandNow: {
     fontFamily: typography.bold,
-    fontSize: 28,
-    color: colors.primary,
-    marginTop: 2,
+    fontSize: 32,
+    color: '#0F172A',
+  },
+  authBrandFix: {
+    fontFamily: typography.bold,
+    fontSize: 32,
+    color: '#F59E0B',
   },
   authSubtitle: {
     fontFamily: typography.regular,
-    fontSize: 13,
+    fontSize: 14,
     color: '#64748B',
-    marginTop: 4,
+    marginTop: 6,
   },
   authTabSwitcher: {
     flexDirection: 'row',
-    backgroundColor: '#EDF2F7',
+    backgroundColor: '#F1F5F9',
     borderRadius: 12,
     padding: 4,
-    marginBottom: 20,
+    marginBottom: 22,
   },
   authTabItem: {
     flex: 1,
@@ -3407,8 +3312,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   authTabItemActive: {
-    backgroundColor: '#FFFFFF',
-    ...CARD_SHADOW,
+    backgroundColor: '#EFF6FF',
   },
   authTabText: {
     fontFamily: typography.medium,
@@ -3435,28 +3339,31 @@ const styles = StyleSheet.create({
   },
   authCountryCode: {
     fontFamily: typography.semibold,
-    fontSize: 14,
-    color: colors.navy,
+    fontSize: 15,
+    color: '#0F172A',
+    marginRight: 4,
   },
   authInputDivider: {
     width: 1,
     height: 20,
     backgroundColor: '#CBD5E1',
+    marginRight: 8,
   },
   authTextInput: {
     flex: 1,
     fontFamily: typography.regular,
-    fontSize: 14,
-    color: colors.navy,
+    fontSize: 15,
+    color: '#0F172A',
     paddingVertical: 0,
   },
   forgotPassBtn: {
     alignSelf: 'flex-end',
     marginTop: 2,
+    marginBottom: 6,
   },
   forgotPassText: {
     fontFamily: typography.medium,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.primary,
   },
   formErrorText: {
@@ -3465,13 +3372,12 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
   authSubmitBtn: {
-    height: 50,
+    height: 52,
     borderRadius: 12,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 6,
-    ...CARD_SHADOW,
+    marginTop: 4,
   },
   authSubmitBtnText: {
     color: '#FFFFFF',
@@ -3482,7 +3388,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginVertical: 10,
+    marginVertical: 12,
   },
   authOrLine: {
     flex: 1,
@@ -3490,12 +3396,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2E8F0',
   },
   authOrText: {
-    fontFamily: typography.regular,
+    fontFamily: typography.medium,
     fontSize: 12,
     color: '#94A3B8',
   },
   socialAuthBtn: {
-    height: 48,
+    height: 50,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -3503,26 +3409,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-  },
-  socialGoogleG: {
-    fontFamily: typography.bold,
-    fontSize: 18,
-    color: '#4285F4',
-  },
-  socialAppleLogo: {
-    fontSize: 18,
-    color: '#0F172A',
+    gap: 10,
   },
   socialAuthBtnText: {
     fontFamily: typography.medium,
-    fontSize: 13,
-    color: colors.navy,
+    fontSize: 14,
+    color: '#0F172A',
   },
   authFooterLink: {
     alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 20,
+    marginTop: 16,
+    paddingBottom: 20,
   },
   authFooterLinkNormal: {
     fontFamily: typography.regular,

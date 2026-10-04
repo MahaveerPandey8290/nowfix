@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nowfix",
+    "scheme": "nowfix-customer",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
@@ -15,7 +15,7 @@
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#2A5DAB"
       },
-      "package": "com.nowfix.app"
+      "package": "com.nowfix.customer"
     },
     "web": {
       "bundler": "metro",

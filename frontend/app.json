@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "NowFix",
-    "slug": "nowfix",
+    "slug": "nowfix-customer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,7 +13,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2A5DAB"
       },
       "package": "com.nowfix.app"
     },
@@ -43,7 +43,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "13f220de-68fb-4d19-8f72-0baff6da1af3"
+        "projectId": "83a52825-fc37-431d-8720-7fc212f36e47"
       }
     },
     "owner": "mahaveer8290"
